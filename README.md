@@ -2,4 +2,4 @@
 
 - Basic implementation of my design doc to be run as a command line program.
 - Useful for making amendments to my original design
-- TODO: Functions to simulate client and supplier portals
+- TODO: Functions to simulate client and supplier portals (which will help further refine the design)
