@@ -2,33 +2,26 @@ import java.util.ArrayList;
 
 public class PurchaseOrder
 {
-    private String id;
+    private final int id;
     private SupplierCompany supplierCompany;
     private ClientCompany clientCompany;
     private final ArrayList<OrderItem> items;
     private PurchaseOrderStatus status;
     private Contract contract;
-
-    public PurchaseOrder(String id, SupplierCompany supplierCompany, ClientCompany clientCompany,
+    
+    private static int globalIdCount = 301;
+    
+    public PurchaseOrder(SupplierCompany supplierCompany, ClientCompany clientCompany,
                          ArrayList<OrderItem> items, PurchaseOrderStatus status,
                          Contract contract)
     {
-        this.setId(id);
+        this.id = globalIdCount;
+        globalIdCount++;
         this.setSupplierCompany(supplierCompany);
         this.setClientCompany(clientCompany);
         this.setStatus(status);
         this.setContract(contract);
         this.items = items;
-    }
-
-    public String getId()
-    {
-        return id;
-    }
-
-    public void setId(String id)
-    {
-        this.id = id;
     }
 
     public SupplierCompany getSupplierCompany()

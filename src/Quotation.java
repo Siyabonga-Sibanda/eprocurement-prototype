@@ -2,34 +2,25 @@ import java.util.ArrayList;
 
 public class Quotation
 {
-    private int id;
+    private final int id;
     private SupplierCompany supplierCompany;
     private ClientCompany clientCompany;
     private PurchaseOrder purchaseOrder;
     private final ArrayList<QuoteItem> ITEMS;
     private double totalCost;
-    private String pathToQuotation;
+    
+    private static int globalIdCount = 100;
 
-    public Quotation(int id, SupplierCompany supplierCompany, ClientCompany clientCompany,
-                     PurchaseOrder purchaseOrder, double totalCost, String pathToQuotation)
+    public Quotation(SupplierCompany supplierCompany, ClientCompany clientCompany,
+                     PurchaseOrder purchaseOrder)
     {
-        this.setId(id);
+        this.id = globalIdCount;
+        globalIdCount++;
         this.setSupplierCompany(supplierCompany);
         this.setClientCompany(clientCompany);
         this.setPurchaseOrder(purchaseOrder);
         this.ITEMS = new ArrayList<QuoteItem>();
-        this.setTotalCost(totalCost);
-        this.setPathToQuotation(pathToQuotation);
-    }
-
-    public int getId()
-    {
-        return id;
-    }
-
-    public void setId(int id)
-    {
-        this.id = id;
+        this.setTotalCost();
     }
 
     public SupplierCompany getSupplierCompany()
@@ -77,18 +68,11 @@ public class Quotation
         return totalCost;
     }
 
-    public void setTotalCost(double totalCost)
+    public void setTotalCost()
     {
-        this.totalCost = totalCost;
-    }
-
-    public String getPathToQuotation()
-    {
-        return pathToQuotation;
-    }
-
-    public void setPathToQuotation(String pathToQuotation)
-    {
-        this.pathToQuotation = pathToQuotation;
+        for (QuoteItem item : ITEMS)
+        {
+            this.totalCost += item.getTotalCost();
+        }
     }
 }

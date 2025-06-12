@@ -1,8 +1,10 @@
 import java.util.ArrayList;
+import java.util.Stack;
 
 public class SupplierCompany extends Company
 {
     private ArrayList<ClientCompany> clientCompanies;
+    private Stack<PurchaseOrder> orders;
     private long prazCertificateNumber;
     private String companyLogoPath;
     private String companyColour;
@@ -11,7 +13,7 @@ public class SupplierCompany extends Company
     private String prazCertificatePath;
     private long taxClearanceExpiryDate;
     private long prazCertificateExpiryDate;
-    private ArrayList<Rating> ratings;
+    private final ArrayList<Rating> ratings;
     private int ratingsCount;
     private int averageRating;
     
@@ -21,6 +23,7 @@ public class SupplierCompany extends Company
     {
         super(name, email, phoneNumber, website, registrationNumber, taxNumber, address, city,
                 country, dateJoined);
+        setOrders(new Stack<PurchaseOrder>());
         clientCompanies = new ArrayList<ClientCompany>();
         ratings = new ArrayList<Rating>();
     }
@@ -143,5 +146,15 @@ public class SupplierCompany extends Company
     public void setAverageRating(int averageRating)
     {
         this.averageRating = averageRating;
+    }
+
+    public Stack<PurchaseOrder> getOrders()
+    {
+        return orders;
+    }
+
+    public void setOrders(Stack<PurchaseOrder> orders)
+    {
+        this.orders = orders;
     }
 }

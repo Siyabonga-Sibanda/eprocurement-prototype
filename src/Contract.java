@@ -5,27 +5,18 @@ public class Contract
     private ClientCompany clientCompany;
     private PurchaseOrder purchaseOrder;
     private boolean isSent;
-    private String pathToContract;
 
-    public Contract(int id, SupplierCompany supplierCompany, ClientCompany clientCompany,
-                    PurchaseOrder purchaseOrder, String pathToContract)
+    private static int globalIdCount = 201;
+    
+    public Contract(SupplierCompany supplierCompany, ClientCompany clientCompany,
+                    PurchaseOrder purchaseOrder)
     {
-        this.setId(id);
+        this.id = globalIdCount;
+        globalIdCount++;
         this.setSupplierCompany(supplierCompany);
         this.setClientCompany(clientCompany);
         this.setPurchaseOrder(purchaseOrder);
         this.setSent(false);
-        this.setPathToContract(pathToContract);
-    }
-
-    public int getId()
-    {
-        return id;
-    }
-
-    public void setId(int id)
-    {
-        this.id = id;
     }
 
     public SupplierCompany getSupplierCompany()
@@ -66,15 +57,5 @@ public class Contract
     public void setSent(boolean sent)
     {
         isSent = sent;
-    }
-
-    public String getPathToContract()
-    {
-        return pathToContract;
-    }
-
-    public void setPathToContract(String pathToContract)
-    {
-        this.pathToContract = pathToContract;
     }
 }

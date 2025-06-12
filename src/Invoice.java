@@ -9,11 +9,9 @@ public class Invoice
     private final ArrayList<InvoiceItem> ITEMS;
     private double totalCost;
     private long dateIssued;
-    private String pathToInvoice;
 
     public Invoice(int id, SupplierCompany supplierCompany, ClientCompany clientCompany,
-                   PurchaseOrder purchaseOrder, double totalCost, long dateIssued,
-                   String pathToInvoice)
+                   PurchaseOrder purchaseOrder, double totalCost, long dateIssued)
     {
         this.setId(id);
         this.setSupplierCompany(supplierCompany);
@@ -22,7 +20,6 @@ public class Invoice
         this.ITEMS = new ArrayList<InvoiceItem>();
         this.setTotalCost(totalCost);
         this.setDateIssued(dateIssued);
-        this.pathToInvoice = pathToInvoice;
     }
 
     public int getId()

@@ -1,0 +1,574 @@
+Index: src/SupplierFunctions.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>public class SupplierFunctions\r\n{\r\n    \r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/SupplierFunctions.java b/src/SupplierFunctions.java
+--- a/src/SupplierFunctions.java	(revision 37492f9a7036a459da5186b324d4ce017ec6992f)
++++ b/src/SupplierFunctions.java	(date 1749738327276)
+@@ -1,4 +1,85 @@
++import java.io.File;
++import java.io.FileNotFoundException;
++import java.io.OutputStream;
++import java.io.PrintWriter;
++
+ public class SupplierFunctions
+ {
++    public static void registerClient(SupplierCompany supplierCompany, ClientCompany clientCompany)
++    {
++        for (ClientCompany client : Data.clientCompanies)
++        {
++            for (ClientCompany innerClient : supplierCompany.getClientCompanies())
++            {
++                if (client.equals(innerClient))
++                {
++                    break;
++                }
++            }
++            
++            if (client.equals(clientCompany))
++            {
++                supplierCompany.addClientCompany(clientCompany);
++            }
++        }
++    }
++    
++    public static void printOrders(SupplierCompany supplierCompany)
++    {
++        for (PurchaseOrder order : supplierCompany.getOrders())
++        {
++            System.out.println("Order from: " + order.getClientCompany() + "\nThey ordered: " +
++                    order);
++        }
++    }
++    
++    public static void generateQuotation(SupplierCompany supplierCompany, ClientCompany clientCompany,
++                                         PurchaseOrder purchaseOrder, String pathToQuotation)
++    {
++        try
++        {
++            File quotationDocument = new File(pathToQuotation);
++            PrintWriter out = new PrintWriter(quotationDocument);
++            Quotation quotation = new Quotation(supplierCompany, clientCompany, purchaseOrder);
++            Data.quotations.add(quotation);
++            
++            out.println("Order from " + clientCompany.getName() + " to " + supplierCompany.getName());
++            out.println();
++            out.println("Order");
++            out.println();
++            out.println(quotation.getItems());
++            out.println("Total cost: " + quotation.getTotalCost());
++            out.close();
++        } 
++        catch (FileNotFoundException exception)
++        {
++            System.out.println("Unable to print Quote.");
++        }
++    }
+     
++    public static void generateContract(SupplierCompany supplierCompany, ClientCompany clientCompany,
++                                        PurchaseOrder purchaseOrder, String pathToContract)
++    {
++        try
++        {
++            File contractDocument = new File(pathToContract);
++            PrintWriter out = new PrintWriter(contractDocument);
++            Contract contract = new Contract(supplierCompany, clientCompany, purchaseOrder);
++            Data.contracts.add(contract);
++            
++            out.println("Contract between " + supplierCompany.getName() + " and " +
++                        clientCompany.getName());
++            out.println("Contract");
++            out.close();
++        }
++        catch (FileNotFoundException exception)
++        {
++            System.out.println("Unable to print contract");
++        }
++    }
++    
++    public static void updateTrackingStatus()
++    {
++        // TODO: Something
++    }
+ }
+Index: src/PurchaseOrder.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import java.util.ArrayList;\r\n\r\npublic class PurchaseOrder\r\n{\r\n    private String id;\r\n    private SupplierCompany supplierCompany;\r\n    private ClientCompany clientCompany;\r\n    private final ArrayList<OrderItem> items;\r\n    private PurchaseOrderStatus status;\r\n    private Contract contract;\r\n\r\n    public PurchaseOrder(String id, SupplierCompany supplierCompany, ClientCompany clientCompany,\r\n                         ArrayList<OrderItem> items, PurchaseOrderStatus status,\r\n                         Contract contract)\r\n    {\r\n        this.setId(id);\r\n        this.setSupplierCompany(supplierCompany);\r\n        this.setClientCompany(clientCompany);\r\n        this.setStatus(status);\r\n        this.setContract(contract);\r\n        this.items = items;\r\n    }\r\n\r\n    public String getId()\r\n    {\r\n        return id;\r\n    }\r\n\r\n    public void setId(String id)\r\n    {\r\n        this.id = id;\r\n    }\r\n\r\n    public SupplierCompany getSupplierCompany()\r\n    {\r\n        return supplierCompany;\r\n    }\r\n\r\n    public void setSupplierCompany(SupplierCompany supplierCompany)\r\n    {\r\n        this.supplierCompany = supplierCompany;\r\n    }\r\n\r\n    public ClientCompany getClientCompany()\r\n    {\r\n        return clientCompany;\r\n    }\r\n\r\n    public void setClientCompany(ClientCompany clientCompany)\r\n    {\r\n        this.clientCompany = clientCompany;\r\n    }\r\n\r\n    public ArrayList<OrderItem> getItems()\r\n    {\r\n        return items;\r\n    }\r\n\r\n    public PurchaseOrderStatus getStatus()\r\n    {\r\n        return status;\r\n    }\r\n\r\n    public void setStatus(PurchaseOrderStatus status)\r\n    {\r\n        this.status = status;\r\n    }\r\n\r\n    public Contract getContract()\r\n    {\r\n        return contract;\r\n    }\r\n\r\n    public void setContract(Contract contract)\r\n    {\r\n        this.contract = contract;\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/PurchaseOrder.java b/src/PurchaseOrder.java
+--- a/src/PurchaseOrder.java	(revision 37492f9a7036a459da5186b324d4ce017ec6992f)
++++ b/src/PurchaseOrder.java	(date 1749738327271)
+@@ -2,18 +2,22 @@
+ 
+ public class PurchaseOrder
+ {
+-    private String id;
++    private final int id;
+     private SupplierCompany supplierCompany;
+     private ClientCompany clientCompany;
+     private final ArrayList<OrderItem> items;
+     private PurchaseOrderStatus status;
+     private Contract contract;
+-
+-    public PurchaseOrder(String id, SupplierCompany supplierCompany, ClientCompany clientCompany,
++    private DeliveryStatus trackingStatus;
++    
++    private static int globalIdCount = 301;
++    
++    public PurchaseOrder(SupplierCompany supplierCompany, ClientCompany clientCompany,
+                          ArrayList<OrderItem> items, PurchaseOrderStatus status,
+                          Contract contract)
+     {
+-        this.setId(id);
++        this.id = globalIdCount;
++        globalIdCount++;
+         this.setSupplierCompany(supplierCompany);
+         this.setClientCompany(clientCompany);
+         this.setStatus(status);
+@@ -21,16 +25,6 @@
+         this.items = items;
+     }
+ 
+-    public String getId()
+-    {
+-        return id;
+-    }
+-
+-    public void setId(String id)
+-    {
+-        this.id = id;
+-    }
+-
+     public SupplierCompany getSupplierCompany()
+     {
+         return supplierCompany;
+Index: src/Contract.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>public class Contract\r\n{\r\n    private int id;\r\n    private SupplierCompany supplierCompany;\r\n    private ClientCompany clientCompany;\r\n    private PurchaseOrder purchaseOrder;\r\n    private boolean isSent;\r\n    private String pathToContract;\r\n\r\n    public Contract(int id, SupplierCompany supplierCompany, ClientCompany clientCompany,\r\n                    PurchaseOrder purchaseOrder, String pathToContract)\r\n    {\r\n        this.setId(id);\r\n        this.setSupplierCompany(supplierCompany);\r\n        this.setClientCompany(clientCompany);\r\n        this.setPurchaseOrder(purchaseOrder);\r\n        this.setSent(false);\r\n        this.setPathToContract(pathToContract);\r\n    }\r\n\r\n    public int getId()\r\n    {\r\n        return id;\r\n    }\r\n\r\n    public void setId(int id)\r\n    {\r\n        this.id = id;\r\n    }\r\n\r\n    public SupplierCompany getSupplierCompany()\r\n    {\r\n        return supplierCompany;\r\n    }\r\n\r\n    public void setSupplierCompany(SupplierCompany supplierCompany)\r\n    {\r\n        this.supplierCompany = supplierCompany;\r\n    }\r\n\r\n    public ClientCompany getClientCompany()\r\n    {\r\n        return clientCompany;\r\n    }\r\n\r\n    public void setClientCompany(ClientCompany clientCompany)\r\n    {\r\n        this.clientCompany = clientCompany;\r\n    }\r\n\r\n    public PurchaseOrder getPurchaseOrder()\r\n    {\r\n        return purchaseOrder;\r\n    }\r\n\r\n    public void setPurchaseOrder(PurchaseOrder purchaseOrder)\r\n    {\r\n        this.purchaseOrder = purchaseOrder;\r\n    }\r\n\r\n    public boolean isSent()\r\n    {\r\n        return isSent;\r\n    }\r\n\r\n    public void setSent(boolean sent)\r\n    {\r\n        isSent = sent;\r\n    }\r\n\r\n    public String getPathToContract()\r\n    {\r\n        return pathToContract;\r\n    }\r\n\r\n    public void setPathToContract(String pathToContract)\r\n    {\r\n        this.pathToContract = pathToContract;\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/Contract.java b/src/Contract.java
+--- a/src/Contract.java	(revision 37492f9a7036a459da5186b324d4ce017ec6992f)
++++ b/src/Contract.java	(date 1749737695160)
+@@ -5,27 +5,18 @@
+     private ClientCompany clientCompany;
+     private PurchaseOrder purchaseOrder;
+     private boolean isSent;
+-    private String pathToContract;
+ 
+-    public Contract(int id, SupplierCompany supplierCompany, ClientCompany clientCompany,
+-                    PurchaseOrder purchaseOrder, String pathToContract)
++    private static int globalIdCount = 201;
++    
++    public Contract(SupplierCompany supplierCompany, ClientCompany clientCompany,
++                    PurchaseOrder purchaseOrder)
+     {
+-        this.setId(id);
++        this.id = globalIdCount;
++        globalIdCount++;
+         this.setSupplierCompany(supplierCompany);
+         this.setClientCompany(clientCompany);
+         this.setPurchaseOrder(purchaseOrder);
+         this.setSent(false);
+-        this.setPathToContract(pathToContract);
+-    }
+-
+-    public int getId()
+-    {
+-        return id;
+-    }
+-
+-    public void setId(int id)
+-    {
+-        this.id = id;
+     }
+ 
+     public SupplierCompany getSupplierCompany()
+@@ -67,14 +58,4 @@
+     {
+         isSent = sent;
+     }
+-
+-    public String getPathToContract()
+-    {
+-        return pathToContract;
+-    }
+-
+-    public void setPathToContract(String pathToContract)
+-    {
+-        this.pathToContract = pathToContract;
+-    }
+ }
+Index: src/DeliveryStatus.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/DeliveryStatus.java b/src/DeliveryStatus.java
+new file mode 100644
+--- /dev/null	(date 1749738162846)
++++ b/src/DeliveryStatus.java	(date 1749738162846)
+@@ -0,0 +1,6 @@
++public enum DeliveryStatus
++{
++    PREPARING,
++    ON_THE_WAY,
++    DELIVERED,
++}
+Index: src/QuoteItem.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>public class QuoteItem extends OrderItem\r\n{\r\n    private double unitPrice;\r\n     \r\n    public QuoteItem(String productID, String productName, String description, int quantity,\r\n                     double unitPrice)\r\n    {\r\n        super(productID, productName, description, quantity);\r\n        this.unitPrice = unitPrice;\r\n    }\r\n\r\n    public double getUnitPrice()\r\n    {\r\n        return unitPrice;\r\n    }\r\n\r\n    public void setUnitPrice(double unitPrice)\r\n    {\r\n        this.unitPrice = unitPrice;\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/QuoteItem.java b/src/QuoteItem.java
+--- a/src/QuoteItem.java	(revision 37492f9a7036a459da5186b324d4ce017ec6992f)
++++ b/src/QuoteItem.java	(date 1749736102194)
+@@ -6,7 +6,12 @@
+                      double unitPrice)
+     {
+         super(productID, productName, description, quantity);
+-        this.unitPrice = unitPrice;
++        this.setUnitPrice(unitPrice);
++    }
++
++    public double getTotalCost()
++    {
++        return getUnitPrice() * this.getQuantity();
+     }
+ 
+     public double getUnitPrice()
+Index: src/Quotation.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import java.util.ArrayList;\r\n\r\npublic class Quotation\r\n{\r\n    private int id;\r\n    private SupplierCompany supplierCompany;\r\n    private ClientCompany clientCompany;\r\n    private PurchaseOrder purchaseOrder;\r\n    private final ArrayList<QuoteItem> ITEMS;\r\n    private double totalCost;\r\n    private String pathToQuotation;\r\n\r\n    public Quotation(int id, SupplierCompany supplierCompany, ClientCompany clientCompany,\r\n                     PurchaseOrder purchaseOrder, double totalCost, String pathToQuotation)\r\n    {\r\n        this.setId(id);\r\n        this.setSupplierCompany(supplierCompany);\r\n        this.setClientCompany(clientCompany);\r\n        this.setPurchaseOrder(purchaseOrder);\r\n        this.ITEMS = new ArrayList<QuoteItem>();\r\n        this.setTotalCost(totalCost);\r\n        this.setPathToQuotation(pathToQuotation);\r\n    }\r\n\r\n    public int getId()\r\n    {\r\n        return id;\r\n    }\r\n\r\n    public void setId(int id)\r\n    {\r\n        this.id = id;\r\n    }\r\n\r\n    public SupplierCompany getSupplierCompany()\r\n    {\r\n        return supplierCompany;\r\n    }\r\n\r\n    public void setSupplierCompany(SupplierCompany supplierCompany)\r\n    {\r\n        this.supplierCompany = supplierCompany;\r\n    }\r\n\r\n    public ClientCompany getClientCompany()\r\n    {\r\n        return clientCompany;\r\n    }\r\n\r\n    public void setClientCompany(ClientCompany clientCompany)\r\n    {\r\n        this.clientCompany = clientCompany;\r\n    }\r\n\r\n    public PurchaseOrder getPurchaseOrder()\r\n    {\r\n        return purchaseOrder;\r\n    }\r\n\r\n    public void setPurchaseOrder(PurchaseOrder purchaseOrder)\r\n    {\r\n        this.purchaseOrder = purchaseOrder;\r\n    }\r\n\r\n    public ArrayList<QuoteItem> getItems()\r\n    {\r\n        return ITEMS;\r\n    }\r\n\r\n    public void addItem(QuoteItem quoteItem)\r\n    {\r\n        this.ITEMS.add(quoteItem);\r\n    }\r\n\r\n    public double getTotalCost()\r\n    {\r\n        return totalCost;\r\n    }\r\n\r\n    public void setTotalCost(double totalCost)\r\n    {\r\n        this.totalCost = totalCost;\r\n    }\r\n\r\n    public String getPathToQuotation()\r\n    {\r\n        return pathToQuotation;\r\n    }\r\n\r\n    public void setPathToQuotation(String pathToQuotation)\r\n    {\r\n        this.pathToQuotation = pathToQuotation;\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/Quotation.java b/src/Quotation.java
+--- a/src/Quotation.java	(revision 37492f9a7036a459da5186b324d4ce017ec6992f)
++++ b/src/Quotation.java	(date 1749737695180)
+@@ -2,34 +2,25 @@
+ 
+ public class Quotation
+ {
+-    private int id;
++    private final int id;
+     private SupplierCompany supplierCompany;
+     private ClientCompany clientCompany;
+     private PurchaseOrder purchaseOrder;
+     private final ArrayList<QuoteItem> ITEMS;
+     private double totalCost;
+-    private String pathToQuotation;
++    
++    private static int globalIdCount = 100;
+ 
+-    public Quotation(int id, SupplierCompany supplierCompany, ClientCompany clientCompany,
+-                     PurchaseOrder purchaseOrder, double totalCost, String pathToQuotation)
++    public Quotation(SupplierCompany supplierCompany, ClientCompany clientCompany,
++                     PurchaseOrder purchaseOrder)
+     {
+-        this.setId(id);
++        this.id = globalIdCount;
++        globalIdCount++;
+         this.setSupplierCompany(supplierCompany);
+         this.setClientCompany(clientCompany);
+         this.setPurchaseOrder(purchaseOrder);
+         this.ITEMS = new ArrayList<QuoteItem>();
+-        this.setTotalCost(totalCost);
+-        this.setPathToQuotation(pathToQuotation);
+-    }
+-
+-    public int getId()
+-    {
+-        return id;
+-    }
+-
+-    public void setId(int id)
+-    {
+-        this.id = id;
++        this.setTotalCost();
+     }
+ 
+     public SupplierCompany getSupplierCompany()
+@@ -77,18 +68,11 @@
+         return totalCost;
+     }
+ 
+-    public void setTotalCost(double totalCost)
++    public void setTotalCost()
+     {
+-        this.totalCost = totalCost;
+-    }
+-
+-    public String getPathToQuotation()
+-    {
+-        return pathToQuotation;
+-    }
+-
+-    public void setPathToQuotation(String pathToQuotation)
+-    {
+-        this.pathToQuotation = pathToQuotation;
++        for (QuoteItem item : ITEMS)
++        {
++            this.totalCost += item.getTotalCost();
++        }
+     }
+ }
+Index: src/Invoice.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import java.util.ArrayList;\r\n\r\npublic class Invoice\r\n{\r\n    private int id;\r\n    private SupplierCompany supplierCompany;\r\n    private ClientCompany clientCompany;\r\n    private PurchaseOrder purchaseOrder;\r\n    private final ArrayList<InvoiceItem> ITEMS;\r\n    private double totalCost;\r\n    private long dateIssued;\r\n    private String pathToInvoice;\r\n\r\n    public Invoice(int id, SupplierCompany supplierCompany, ClientCompany clientCompany,\r\n                   PurchaseOrder purchaseOrder, double totalCost, long dateIssued,\r\n                   String pathToInvoice)\r\n    {\r\n        this.setId(id);\r\n        this.setSupplierCompany(supplierCompany);\r\n        this.setClientCompany(clientCompany);\r\n        this.setPurchaseOrder(purchaseOrder);\r\n        this.ITEMS = new ArrayList<InvoiceItem>();\r\n        this.setTotalCost(totalCost);\r\n        this.setDateIssued(dateIssued);\r\n        this.pathToInvoice = pathToInvoice;\r\n    }\r\n\r\n    public int getId()\r\n    {\r\n        return id;\r\n    }\r\n\r\n    public void setId(int id)\r\n    {\r\n        this.id = id;\r\n    }\r\n\r\n    public SupplierCompany getSupplierCompany()\r\n    {\r\n        return supplierCompany;\r\n    }\r\n\r\n    public void setSupplierCompany(SupplierCompany supplierCompany)\r\n    {\r\n        this.supplierCompany = supplierCompany;\r\n    }\r\n\r\n    public ClientCompany getClientCompany()\r\n    {\r\n        return clientCompany;\r\n    }\r\n\r\n    public void setClientCompany(ClientCompany clientCompany)\r\n    {\r\n        this.clientCompany = clientCompany;\r\n    }\r\n\r\n    public PurchaseOrder getPurchaseOrder()\r\n    {\r\n        return purchaseOrder;\r\n    }\r\n\r\n    public void setPurchaseOrder(PurchaseOrder purchaseOrder)\r\n    {\r\n        this.purchaseOrder = purchaseOrder;\r\n    }\r\n\r\n    public ArrayList<InvoiceItem> getItems()\r\n    {\r\n        return ITEMS;\r\n    }\r\n    \r\n    public void addInvoiceItem(InvoiceItem invoiceItem)\r\n    {\r\n        this.ITEMS.add(invoiceItem);\r\n    }\r\n\r\n    public double getTotalCost()\r\n    {\r\n        return totalCost;\r\n    }\r\n\r\n    public void setTotalCost(double totalCost)\r\n    {\r\n        this.totalCost = totalCost;\r\n    }\r\n\r\n    public long getDateIssued()\r\n    {\r\n        return dateIssued;\r\n    }\r\n\r\n    public void setDateIssued(long dateIssued)\r\n    {\r\n        this.dateIssued = dateIssued;\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/Invoice.java b/src/Invoice.java
+--- a/src/Invoice.java	(revision 37492f9a7036a459da5186b324d4ce017ec6992f)
++++ b/src/Invoice.java	(date 1749737695173)
+@@ -9,11 +9,9 @@
+     private final ArrayList<InvoiceItem> ITEMS;
+     private double totalCost;
+     private long dateIssued;
+-    private String pathToInvoice;
+ 
+     public Invoice(int id, SupplierCompany supplierCompany, ClientCompany clientCompany,
+-                   PurchaseOrder purchaseOrder, double totalCost, long dateIssued,
+-                   String pathToInvoice)
++                   PurchaseOrder purchaseOrder, double totalCost, long dateIssued)
+     {
+         this.setId(id);
+         this.setSupplierCompany(supplierCompany);
+@@ -22,7 +20,6 @@
+         this.ITEMS = new ArrayList<InvoiceItem>();
+         this.setTotalCost(totalCost);
+         this.setDateIssued(dateIssued);
+-        this.pathToInvoice = pathToInvoice;
+     }
+ 
+     public int getId()
+Index: src/SupplierCompany.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import java.util.ArrayList;\r\n\r\npublic class SupplierCompany extends Company\r\n{\r\n    private ArrayList<ClientCompany> clientCompanies;\r\n    private long prazCertificateNumber;\r\n    private String companyLogoPath;\r\n    private String companyColour;\r\n    private String registrationCertificatePath;\r\n    private String taxClearanceCertificatePath;\r\n    private String prazCertificatePath;\r\n    private long taxClearanceExpiryDate;\r\n    private long prazCertificateExpiryDate;\r\n    private ArrayList<Rating> ratings;\r\n    private int ratingsCount;\r\n    private int averageRating;\r\n    \r\n    public SupplierCompany(String name, String email, long phoneNumber, String website,\r\n                           long registrationNumber, long taxNumber, String address, String city,\r\n                           String country, long dateJoined)\r\n    {\r\n        super(name, email, phoneNumber, website, registrationNumber, taxNumber, address, city,\r\n                country, dateJoined);\r\n        clientCompanies = new ArrayList<ClientCompany>();\r\n        ratings = new ArrayList<Rating>();\r\n    }\r\n    \r\n    public ArrayList<ClientCompany> getClientCompanies()\r\n    {\r\n        return clientCompanies;\r\n    }\r\n    \r\n    public void addClientCompany(ClientCompany clientCompany)\r\n    {\r\n        this.clientCompanies.add(clientCompany);\r\n    }\r\n    \r\n    public long getPrazCertificateNumber()\r\n    {\r\n        return prazCertificateNumber;\r\n    }\r\n\r\n    public void setPrazCertificateNumber(long prazCertificateNumber)\r\n    {\r\n        this.prazCertificateNumber = prazCertificateNumber;\r\n    }\r\n\r\n    public String getCompanyLogoPath()\r\n    {\r\n        return companyLogoPath;\r\n    }\r\n\r\n    public void setCompanyLogoPath(String companyLogoPath)\r\n    {\r\n        this.companyLogoPath = companyLogoPath;\r\n    }\r\n\r\n    public String getCompanyColour()\r\n    {\r\n        return companyColour;\r\n    }\r\n\r\n    public void setCompanyColour(String companyColour)\r\n    {\r\n        this.companyColour = companyColour;\r\n    }\r\n\r\n    public String getRegistrationCertificatePath()\r\n    {\r\n        return registrationCertificatePath;\r\n    }\r\n\r\n    public void setRegistrationCertificatePath(String registrationCertificatePath)\r\n    {\r\n        this.registrationCertificatePath = registrationCertificatePath;\r\n    }\r\n\r\n    public String getTaxClearanceCertificatePath()\r\n    {\r\n        return taxClearanceCertificatePath;\r\n    }\r\n\r\n    public void setTaxClearanceCertificatePath(String taxClearanceCertificatePath)\r\n    {\r\n        this.taxClearanceCertificatePath = taxClearanceCertificatePath;\r\n    }\r\n\r\n    public String getPrazCertificatePath()\r\n    {\r\n        return prazCertificatePath;\r\n    }\r\n\r\n    public void setPrazCertificatePath(String prazCertificatePath)\r\n    {\r\n        this.prazCertificatePath = prazCertificatePath;\r\n    }\r\n\r\n    public long getTaxClearanceExpiryDate()\r\n    {\r\n        return taxClearanceExpiryDate;\r\n    }\r\n\r\n    public void setTaxClearanceExpiryDate(long taxClearanceExpiryDate)\r\n    {\r\n        this.taxClearanceExpiryDate = taxClearanceExpiryDate;\r\n    }\r\n\r\n    public long getPrazCertificateExpiryDate()\r\n    {\r\n        return prazCertificateExpiryDate;\r\n    }\r\n\r\n    public void setPrazCertificateExpiryDate(long prazCertificateExpiryDate)\r\n    {\r\n        this.prazCertificateExpiryDate = prazCertificateExpiryDate;\r\n    }\r\n\r\n    public ArrayList<Rating> getRatings()\r\n    {\r\n        return ratings;\r\n    }\r\n\r\n    public void addRating(Rating newRating)\r\n    {\r\n        this.ratings.add(newRating);\r\n    }\r\n\r\n    public int getRatingsCount()\r\n    {\r\n        return ratingsCount;\r\n    }\r\n\r\n    public void setRatingsCount(int ratingsCount)\r\n    {\r\n        this.ratingsCount = ratingsCount;\r\n    }\r\n\r\n    public int getAverageRating()\r\n    {\r\n        return averageRating;\r\n    }\r\n\r\n    public void setAverageRating(int averageRating)\r\n    {\r\n        this.averageRating = averageRating;\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/SupplierCompany.java b/src/SupplierCompany.java
+--- a/src/SupplierCompany.java	(revision 37492f9a7036a459da5186b324d4ce017ec6992f)
++++ b/src/SupplierCompany.java	(date 1749736973832)
+@@ -1,8 +1,10 @@
+ import java.util.ArrayList;
++import java.util.Stack;
+ 
+ public class SupplierCompany extends Company
+ {
+     private ArrayList<ClientCompany> clientCompanies;
++    private Stack<PurchaseOrder> orders;
+     private long prazCertificateNumber;
+     private String companyLogoPath;
+     private String companyColour;
+@@ -11,7 +13,7 @@
+     private String prazCertificatePath;
+     private long taxClearanceExpiryDate;
+     private long prazCertificateExpiryDate;
+-    private ArrayList<Rating> ratings;
++    private final ArrayList<Rating> ratings;
+     private int ratingsCount;
+     private int averageRating;
+     
+@@ -21,6 +23,7 @@
+     {
+         super(name, email, phoneNumber, website, registrationNumber, taxNumber, address, city,
+                 country, dateJoined);
++        setOrders(new Stack<PurchaseOrder>());
+         clientCompanies = new ArrayList<ClientCompany>();
+         ratings = new ArrayList<Rating>();
+     }
+@@ -144,4 +147,14 @@
+     {
+         this.averageRating = averageRating;
+     }
++
++    public Stack<PurchaseOrder> getOrders()
++    {
++        return orders;
++    }
++
++    public void setOrders(Stack<PurchaseOrder> orders)
++    {
++        this.orders = orders;
++    }
+ }
+Index: src/ClientFuntions.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/ClientFuntions.java b/src/ClientFunctions.java
+rename from src/ClientFuntions.java
+rename to src/ClientFunctions.java
+--- a/src/ClientFuntions.java	(revision 37492f9a7036a459da5186b324d4ce017ec6992f)
++++ b/src/ClientFunctions.java	(date 1749734260256)
+@@ -1,3 +1,3 @@
+-public class ClientFuntions
++public class ClientFunctions
+ {
+ }
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"ed102105-324c-4b0c-8eaa-355e87f2433a\" name=\"Changes\" comment=\"\">\r\n      <change afterPath=\"$PROJECT_DIR$/.gitignore\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/.idea/checkstyle-idea.xml\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/.idea/misc.xml\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/.idea/modules.xml\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/.idea/uiDesigner.xml\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/.idea/vcs.xml\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/eprocurementprototype.iml\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/ClientCompany.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/Company.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/Contract.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/Invoice.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/InvoiceApproval.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/InvoiceItem.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/Main.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/OrderItem.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/PurchaseOrder.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/PurchaseOrderMatch.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/PurchaseOrderStatus.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/Quotation.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/QuoteItem.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/Rating.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/Requisition.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/RequisitionStatus.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/SupplierCompany.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/User.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/UserRoles.java\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Enum\" />\r\n        <option value=\"Class\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"ProjectColorInfo\"><![CDATA[{\r\n  \"associatedIndex\": 6\r\n}]]></component>\r\n  <component name=\"ProjectId\" id=\"2yOvKt4busmITFh9lOvk3y4gMvi\" />\r\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\">\r\n    <ConfirmationsSetting value=\"2\" id=\"Add\" />\r\n  </component>\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\"><![CDATA[{\r\n  \"keyToString\": {\r\n    \"Application.Main.executor\": \"Run\",\r\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\r\n    \"SHARE_PROJECT_CONFIGURATION_FILES\": \"true\",\r\n    \"git-widget-placeholder\": \"master\",\r\n    \"kotlin-language-version-configured\": \"true\",\r\n    \"last_opened_file_path\": \"C:/Coding/ClassScripts/CS115/SecretAgent1/src/Clearance.java\",\r\n    \"project.structure.last.edited\": \"Modules\",\r\n    \"project.structure.proportion\": \"0.0\",\r\n    \"project.structure.side.proportion\": \"0.0\"\r\n  }\r\n}]]></component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"ed102105-324c-4b0c-8eaa-355e87f2433a\" name=\"Changes\" comment=\"\" />\r\n      <created>1749718373638</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1749718373638</updated>\r\n    </task>\r\n    <servers />\r\n  </component>\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State />\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 37492f9a7036a459da5186b324d4ce017ec6992f)
++++ b/.idea/workspace.xml	(date 1749738163229)
+@@ -4,34 +4,18 @@
+     <option name="autoReloadType" value="SELECTIVE" />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="ed102105-324c-4b0c-8eaa-355e87f2433a" name="Changes" comment="">
+-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/.idea/checkstyle-idea.xml" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/eprocurementprototype.iml" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/ClientCompany.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/Company.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/Contract.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/Invoice.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/InvoiceApproval.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/InvoiceItem.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/OrderItem.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/PurchaseOrder.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/PurchaseOrderMatch.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/PurchaseOrderStatus.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/Quotation.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/QuoteItem.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/Rating.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/Requisition.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/RequisitionStatus.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/SupplierCompany.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/User.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/UserRoles.java" afterDir="false" />
++    <list default="true" id="ed102105-324c-4b0c-8eaa-355e87f2433a" name="Changes" comment="Typed some stuff">
++      <change afterPath="$PROJECT_DIR$/src/Data.java" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/src/DeliveryStatus.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/ClientFuntions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ClientFunctions.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/Contract.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Contract.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/Invoice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Invoice.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/PurchaseOrder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/PurchaseOrder.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/Quotation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Quotation.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/QuoteItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/QuoteItem.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/SupplierCompany.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SupplierCompany.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/SupplierFunctions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SupplierFunctions.java" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -41,14 +25,26 @@
+   <component name="FileTemplateManagerImpl">
+     <option name="RECENT_TEMPLATES">
+       <list>
+-        <option value="Enum" />
+         <option value="Class" />
++        <option value="Enum" />
+       </list>
+     </option>
+   </component>
+   <component name="Git.Settings">
+     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+   </component>
++  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
++  "lastFilter": {
++    "state": "OPEN",
++    "assignee": "Siyabonga-Sibanda"
++  }
++}]]></component>
++  <component name="GithubPullRequestsUISettings"><![CDATA[{
++  "selectedUrlAndAccountId": {
++    "url": "https://github.com/Siyabonga-Sibanda/eprocurement-prototype",
++    "accountId": "e03db9a4-f1f7-4fcf-a532-6bd20328ad37"
++  }
++}]]></component>
+   <component name="ProjectColorInfo"><![CDATA[{
+   "associatedIndex": 6
+ }]]></component>
+@@ -82,6 +78,15 @@
+       <option name="presentableId" value="Default" />
+       <updated>1749718373638</updated>
+     </task>
++    <task id="LOCAL-00001" summary="Typed some stuff">
++      <option name="closed" value="true" />
++      <created>1749733597862</created>
++      <option name="number" value="00001" />
++      <option name="presentableId" value="LOCAL-00001" />
++      <option name="project" value="LOCAL" />
++      <updated>1749733597862</updated>
++    </task>
++    <option name="localTasksCounter" value="2" />
+     <servers />
+   </component>
+   <component name="Vcs.Log.Tabs.Properties">
+@@ -89,10 +94,26 @@
+       <map>
+         <entry key="MAIN">
+           <value>
+-            <State />
++            <State>
++              <option name="FILTERS">
++                <map>
++                  <entry key="branch">
++                    <value>
++                      <list>
++                        <option value="master" />
++                      </list>
++                    </value>
++                  </entry>
++                </map>
++              </option>
++            </State>
+           </value>
+         </entry>
+       </map>
+     </option>
++  </component>
++  <component name="VcsManagerConfiguration">
++    <MESSAGE value="Typed some stuff" />
++    <option name="LAST_COMMIT_MESSAGE" value="Typed some stuff" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: src/Data.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/Data.java b/src/Data.java
+new file mode 100644
+--- /dev/null	(date 1749737695188)
++++ b/src/Data.java	(date 1749737695188)
+@@ -0,0 +1,9 @@
++import java.util.ArrayList;
++
++public class Data
++{
++    public static ArrayList<SupplierCompany> supplierCompanies =  new ArrayList<>();
++    public static ArrayList<ClientCompany> clientCompanies = new ArrayList<>();
++    public static ArrayList<Quotation> quotations = new ArrayList<>();
++    public static ArrayList<Contract> contracts = new ArrayList<>();
++}

@@ -6,7 +6,12 @@ public class QuoteItem extends OrderItem
                      double unitPrice)
     {
         super(productID, productName, description, quantity);
-        this.unitPrice = unitPrice;
+        this.setUnitPrice(unitPrice);
+    }
+
+    public double getTotalCost()
+    {
+        return getUnitPrice() * this.getQuantity();
     }
 
     public double getUnitPrice()
